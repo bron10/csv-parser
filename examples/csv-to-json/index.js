@@ -33,7 +33,7 @@
 //   }
 // });
 
-const parser = require('./csv-parser');
+const parser = require('../../src/index');
 
 const csvString = `movieId,title,genres
 1,Toy Story (1995),Adventure|Animation|Children|Comedy|Fantasy
@@ -42,4 +42,12 @@ const csvString = `movieId,title,genres
 4,Waiting to Exhale (1995),Comedy|Drama|Romance
 5,Father of the Bride Part II (1995),Comedy`;
 
-parser().csvToJson(csvString);
+let parserObj = parser({"field_1": "aaa", "field_2": "bbb", "field_3": "ccc"}, {
+    header: true
+})
+// parserObj.csvToJson();
+const processor = parserObj.toCSV();
+// processor.on('data', (chunk) => {
+//     console.log("chunk", chunk);
+// })
+processor.pipe(process.stdout)
