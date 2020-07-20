@@ -33,21 +33,32 @@
 //   }
 // });
 
+async function printStream(streamObj) {
+  for await (const chunk of streamObj) {
+    // eslint-disable-next-line no-console
+    console.log(chunk);
+  }
+}
+
 const parser = require('../../src/index');
 
 const csvString = `movieId,title,genres
-1,Toy Story (1995),Adventure|Animation|Children|Comedy|Fantasy
-2,Jumanji (1995),Adventure|Children|Fantasy
-3,Grumpier Old Men (1995),Comedy|Romance
-4,Waiting to Exhale (1995),Comedy|Drama|Romance
-5,Father of the Bride Part II (1995),Comedy`;
+1-Toy Story (1995)-Adventure|Animation|Children|Comedy|Fantasy
+2-Jumanji (1995)-Adventure|Children|Fantasy
+3-Grumpier Old Men (1995)-Comedy|Romance
+4-Waiting to Exhale (1995)-Comedy|Drama|Romance
+5-Father of the Bride Part II (1995)-Comedy`;
 
-let parserObj = parser({"field_1": "aaa", "field_2": "bbb", "field_3": "ccc"}, {
-    header: true
-})
-// parserObj.csvToJson();
+const parserObj = parser(
+  { field_1: 'aaa', field_2: 'bbb', field_3: 'ccc' },
+  {
+    includeHeader: true,
+  },
+);
 const processor = parserObj.toCSV();
-// processor.on('data', (chunk) => {
-//     console.log("chunk", chunk);
-// })
-processor.pipe(process.stdout)
+printStream(processor);
+
+const parsObj1 = parser(csvString, { includeHeader: true, header: ele => ele.toUpperCase(), propertyDelimiter: '-' });
+// parsObj1.setPropertyDelimiter('-');
+const processor1 = parsObj1.toJSON();
+printStream(processor1);

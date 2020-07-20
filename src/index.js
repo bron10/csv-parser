@@ -1,51 +1,36 @@
-const { convertToJSON, isFileLocationValid, throwErr, toIterable, setDefaultOptions} = require('./utils');
 const { Readable } = require('stream');
-const os = require("os");
+const {
+  convertToJSON, isFileLocationValid, toIterable, setDefaultOptions, generateLines,
+} = require('./utils');
 const ConstantObj = require('./constants');
 
 class CsvParser {
-  constructor(ip, options) {
+  constructor(ip, optionValue) {
+    // eslint-disable-next-line no-undef
     this.inputData = isFileLocationValid(ip) ? getData(ip) : ip;
-    this.options = setDefaultOptions(options);
+    this.options = setDefaultOptions(optionValue);
   }
 
   getPropertDelimiter() {
-    if (this.propertyDelimiter === undefined) {
-      this.propertyDelimiter = ConstantObj.DEFAULTS.CSV_PROPERTY_DELIMITER;
+    if (this.options.propertyDelimiter === undefined) {
+      this.options.propertyDelimiter = ConstantObj.DEFAULTS.CSV_PROPERTY_DELIMITER;
     }
-    return this.propertyDelimiter;
+    return this.options.propertyDelimiter;
   }
 
   setPropertyDelimiter(newPropertyDelimiter) {
-    this.propertyDelimiter = newPropertyDelimiter;
+    this.options.propertyDelimiter = newPropertyDelimiter;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  csvToJson() {
-    return convertToJSON(this.fileLocation);
-  }
-  
-  convertToJSON(){
-    let data = getStreamData(this.fileLocation)
+  toJSON() {
+    return Readable.from(
+      convertToJSON(this.inputData, this.options),
+    );
   }
 
-  toCSV(){
-    return Readable.from(this.generateLines(toIterable(this.inputData), this.options));
-  }
-
-  async * generateLines(parsedData, {propertyDelimiter, header}){
-    let headerLine;
-    for(const datum of parsedData){
-      if(header && !headerLine) {
-        const currentKeys = Object.keys(datum);
-        headerLine = currentKeys.join(propertyDelimiter) + os.EOL;
-        yield headerLine;
-      }
-      const line =  Object.values(datum).join(propertyDelimiter);
-      yield line + os.EOL;
-    }
-    return null; 
+  toCSV() {
+    return Readable.from(generateLines(toIterable(this.inputData), this.options));
   }
 }
 
-module.exports = (options) => new CsvParser(options);
+module.exports = (inputObj, options) => new CsvParser(inputObj, options);
